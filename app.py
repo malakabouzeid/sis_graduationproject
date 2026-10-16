@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 from course_recommender import CourseRecommender
+from academic_analytics import AcademicAnalytics
 from local_llm import LocalLLMError
 
 ROOT = Path(__file__).resolve().parent
@@ -25,6 +26,9 @@ def recommend_courses(student_id, top_n=5):
         print(f"  Why: {course['reason']}")
     print(f"\nNote: {result['note']}")
 
+def run_academic_analytics(student_id):
+    analytics = AcademicAnalytics(data_dir=ROOT / "uni_assist_dataset")
+    analytics.print_report(student_id)
 
 def read_temperature(default=0.5):
     selection = input(f"Temperature 0-1 [{default}]: ").strip()
@@ -68,7 +72,8 @@ def run_interactive():
         print("\nAI-Powered Educational Chatbot")
         print("1. Chat")
         print("2. Course recommendations")
-        print("3. Exit")
+        print("3. Academic Analytics")
+        print("4. Exit")
         try:
             choice = input("Select an option: ").strip()
         except EOFError:
@@ -85,10 +90,19 @@ def run_interactive():
                 recommend_courses(student_id, top_n)
             except ValueError as error:
                 print(f"Could not recommend courses: {error}")
+
         elif choice == "3":
+            student_id = input("Student ID (for example S0001): ").strip()
+            try:
+                run_academic_analytics(student_id)
+            except (ValueError, FileNotFoundError) as error:
+                print(f"Could not analyze student: {error}")
+
+        elif choice == "4":
             return 0
+
         else:
-            print("Choose 1, 2, or 3.")
+            print("Choose 1, 2, 3, or 4.")
 
 
 def main(argv=None):
